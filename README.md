@@ -1,11 +1,11 @@
 # Docker image for A1111 Stable Diffusion Web UI, Kohya_ss and ComfyUI
 
-Now with SDXL support.
+Now with SDXL and ROCm support. In progress. Not everything is working because of an incomplete xtensors, but it should work later with this PR. https://github.com/ROCmSoftwarePlatform/xformers/pull/6 
 
 ## Installs
 
 * Ubuntu 22.04 LTS
-* CUDA 11.8
+* ROCm 5.6
 * Python 3.10.12
 * [Automatic1111 Stable Diffusion Web UI](
   https://github.com/AUTOMATIC1111/stable-diffusion-webui) 1.7.0
@@ -27,8 +27,8 @@ Now with SDXL support.
 * [Kohya_ss](https://github.com/bmaltais/kohya_ss) v22.4.0
 * [ComfyUI](https://github.com/comfyanonymous/ComfyUI)
 * [ComfyUI Manager](https://github.com/ltdrdata/ComfyUI-Manager)
-* Torch 2.0.1
-* xformers 0.0.22
+* Torch 2.1.2
+* xformers 0.0.23
 * [sd_xl_base_1.0.safetensors](
   https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors)
 * [sd_xl_refiner_1.0.safetensors](
@@ -41,13 +41,6 @@ Now with SDXL support.
 * [croc](https://github.com/schollz/croc)
 * [rclone](https://rclone.org/)
 * [Application Manager](https://github.com/ashleykleynhans/app-manager)
-
-## Available on RunPod
-
-This image is designed to work on [RunPod](https://runpod.io?ref=2xxro4sy).
-You can use my custom [RunPod template](
-https://runpod.io/gsc?template=ya6013lj5a&ref=2xxro4sy)
-to launch it on RunPod.
 
 ## Building the Docker image
 
@@ -82,28 +75,17 @@ docker push username/image-name:1.0.0
 
 ## Running Locally
 
-### Install Nvidia CUDA Driver
+### Install AMD ROCm Driver
 
-- [Linux](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html)
-- [Windows](https://docs.nvidia.com/cuda/cuda-installation-guide-microsoft-windows/index.html)
+- [Linux](https://rocm.docs.amd.com/projects/install-on-linux/en/latest/tutorial/quick-start.html)
 
 ### Start the Docker container
 
 ```bash
-docker run -d \
-  --gpus all \
-  -v /workspace \
-  -p 3000:3001 \
-  -p 3010:3011 \
-  -p 3020:3021 \
-  -p 6006:6066 \
-  -p 8888:8888 \
-  -e JUPYTER_PASSWORD=Jup1t3R! \
-  -e ENABLE_TENSORBOARD=1 \
-  ashleykza/stable-diffusion-webui:latest
+docker run -it -v /workspace -it --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --device=/dev/kfd --device=/dev/dri --group-add video --ipc=host --shm-size 8G -p 3000:3001 -p 3010:3011 -p 3020:3021 -p 6006:6066 -p 8888:8888 -p 8000:8000 -e JUPYTER_PASSWORD=Jup1t3R! -e ENABLE_TENSORBOARD=1 psnrainbowtrout/sdrocker:1.0.0
 ```
 
-You can obviously substitute the image name and tag with your own.
+You should substitute the image name and tag with your own.
 
 ## Acknowledgements
 
@@ -111,18 +93,10 @@ You can obviously substitute the image name and tag with your own.
    of the [container](https://github.com/runpod/containers) code.
 2. [Bernard Maltais](https://github.com/bmaltais) (core developer of Kohya_ss)
    for assisting with optimizing the Docker image.
+3. [Ashley Kleynhans](https://github.com/ashleykleynhans) for the original image configured for NVidia.
 
 ## Community and Contributing
 
 Pull requests and issues on [GitHub](https://github.com/ashleykleynhans/stable-diffusion-docker)
 are welcome. Bug fixes and new features are encouraged.
 
-You can contact me and get help with deploying your container
-to RunPod on the RunPod Discord Server below,
-my username is **ashleyk**.
-
-<a target="_blank" href="https://discord.gg/pJ3P2DbUUq">![Discord Banner 2](https://discordapp.com/api/guilds/912829806415085598/widget.png?style=banner2)</a>
-
-## Appreciate my work?
-
-<a href="https://www.buymeacoffee.com/ashleyk" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
