@@ -28,7 +28,7 @@ Now with SDXL and ROCm support. In progress. Not everything is working because o
 * [ComfyUI](https://github.com/comfyanonymous/ComfyUI)
 * [ComfyUI Manager](https://github.com/ltdrdata/ComfyUI-Manager)
 * Torch 2.1.2
-* xformers 0.0.23
+* [xformers 0.0.23](https://github.com/ROCmSoftwarePlatform/xformers/)
 * [sd_xl_base_1.0.safetensors](
   https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors)
 * [sd_xl_refiner_1.0.safetensors](
