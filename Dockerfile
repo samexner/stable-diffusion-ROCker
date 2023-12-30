@@ -1,9 +1,11 @@
 # Stage 1: Base
-FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04 as base
+FROM rocm/dev-ubuntu-22.04:5.6.1-complete as base
 
 ARG WEBUI_VERSION=v1.7.0
 ARG DREAMBOOTH_COMMIT=cf086c536b141fc522ff11f6cffc8b7b12da04b9
 ARG KOHYA_VERSION=v22.4.0
+# ROCm: use 5.6 for now...
+ARG PYTORCH_URL=https://download.pytorch.org/whl/rocm5.6
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND=noninteractive \
@@ -65,9 +67,17 @@ RUN apt update && \
 # Set Python
 RUN ln -s /usr/bin/python3.10 /usr/bin/python
 
-# Install Torch, xformers and tensorrt
-RUN pip3 install --no-cache-dir torch==2.0.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
-    pip3 install --no-cache-dir xformers==0.0.22 tensorrt
+# Install Torch
+# ROCm: Build xformers from source. Install tensorflow-rocm instead of tensorflow
+#
+RUN pip3 install --no-cache-dir torch torchvision torchaudio --index-url $PYTORCH_URL
+
+RUN pip3 install --no-cache-dir ninja tensorflow-rocm
+
+#RUN pip3 install -v -U git+https://github.com/ROCmSoftwarePlatform/xformers@refs/pull/6/head#egg=xformers
+RUN pip3 install --no-cache-dir -v -U git+https://github.com/ROCmSoftwarePlatform/xformers#egg=xformers
+
+RUN pip3 install --no-cache-dir tensorrt
 
 # Stage 2: Install applications
 FROM base as setup
@@ -93,24 +103,23 @@ RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git && \
 WORKDIR /stable-diffusion-webui
 RUN python3 -m venv --system-site-packages /venv && \
     source /venv/bin/activate && \
-    pip3 install --no-cache-dir torch==2.0.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
+    pip3 install --no-cache-dir torch torchvision torchaudio --index-url $PYTORCH_URL && \
     pip3 install --no-cache-dir xformers && \
-    pip3 install tensorflow[and-cuda] && \
     deactivate
 
 # Install the dependencies for the Automatic1111 Stable Diffusion Web UI
 COPY a1111/requirements.txt a1111/requirements_versions.txt ./
 COPY a1111/cache-sd-model.py a1111/install-automatic.py ./
 RUN source /venv/bin/activate && \
-    python3 -m install-automatic --skip-torch-cuda-test && \
+    python3 -m install-automatic --skip-torch-cuda-test --no-half && \
     deactivate
 
 # Cache the Stable Diffusion Models
 # SDXL models result in OOM kills with 8GB system memory, probably need 12GB+ to cache these
-RUN source /venv/bin/activate && \
-    python3 cache-sd-model.py --no-half-vae --use-cpu=all --ckpt /sd-models/sd_xl_base_1.0.safetensors && \
-    python3 cache-sd-model.py --no-half-vae --use-cpu=all --ckpt /sd-models/sd_xl_refiner_1.0.safetensors && \
-    deactivate
+# RUN source /venv/bin/activate && \
+#    python3 cache-sd-model.py --no-half-vae --use-cpu=all --ckpt /sd-models/sd_xl_base_1.0.safetensors && \
+#    python3 cache-sd-model.py --no-half-vae --use-cpu=all --ckpt /sd-models/sd_xl_refiner_1.0.safetensors && \
+#    deactivate
 
 # Clone the Automatic1111 Extensions
 RUN git clone https://github.com/d8ahazard/sd_dreambooth_extension.git extensions/sd_dreambooth_extension && \
@@ -177,7 +186,7 @@ RUN echo "CUDA" > /stable-diffusion-webui/extensions/sd-webui-reactor/last_devic
 # Fix Tensorboard
 RUN source /venv/bin/activate && \
     pip3 uninstall -y tensorboard tb-nightly && \
-    pip3 install tensorboard tensorflow && \
+    pip3 install tensorboard tensorflow-rocm && \
     pip3 cache purge && \
     deactivate
 
@@ -188,11 +197,11 @@ COPY kohya_ss/requirements* ./
 RUN git checkout ${KOHYA_VERSION} && \
     python3 -m venv --system-site-packages venv && \
     source venv/bin/activate && \
-    pip3 install --no-cache-dir torch==2.0.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
-    pip3 install --no-cache-dir xformers==0.0.22 \
-        bitsandbytes==0.41.1 \
-        tensorboard==2.14.1 \
-        tensorflow==2.14.0 \
+    pip3 install --no-cache-dir torch torchvision torchaudio --index-url $PYTORCH_URL && \
+    pip3 install --no-cache-dir xformers \
+        bitsandbytes \
+        tensorboard \
+        tensorflow-rocm \
         wheel \
         scipy \
         tensorrt && \
@@ -206,8 +215,8 @@ RUN git clone https://github.com/comfyanonymous/ComfyUI.git /ComfyUI
 WORKDIR /ComfyUI
 RUN python3 -m venv --system-site-packages venv && \
     source venv/bin/activate && \
-    pip3 install --no-cache-dir torch==2.0.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
-    pip3 install --no-cache-dir xformers==0.0.22 && \
+    pip3 install --no-cache-dir torch torchvision torchaudio --index-url $PYTORCH_URL && \
+    pip3 install --no-cache-dir xformers && \
     pip3 install -r requirements.txt && \
     deactivate
 
