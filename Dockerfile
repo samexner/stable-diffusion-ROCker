@@ -68,14 +68,14 @@ RUN apt update && \
 RUN ln -s /usr/bin/python3.10 /usr/bin/python
 
 # Install Torch
-# ROCm: Build xformers from source. Install tensorflow-rocm instead of tensorflow
+# ROCm: Install tensorflow-rocm instead of tensorflow
 #
 RUN pip3 install --no-cache-dir torch torchvision torchaudio --index-url $PYTORCH_URL
 
 RUN pip3 install --no-cache-dir ninja tensorflow-rocm
 
-#RUN pip3 install -v -U git+https://github.com/ROCmSoftwarePlatform/xformers@refs/pull/6/head#egg=xformers
-RUN pip3 install --no-cache-dir -v -U git+https://github.com/ROCmSoftwarePlatform/xformers#egg=xformers
+# ROCm: Build xformers from source
+RUN pip3 install --no-cache-dir -v -U git+https://github.com/ROCmSoftwarePlatform/xformers.git@refs/pull/6/merge#egg=xformers
 
 RUN pip3 install --no-cache-dir tensorrt
 
@@ -116,10 +116,10 @@ RUN source /venv/bin/activate && \
 
 # Cache the Stable Diffusion Models
 # SDXL models result in OOM kills with 8GB system memory, probably need 12GB+ to cache these
-# RUN source /venv/bin/activate && \
-#    python3 cache-sd-model.py --no-half-vae --use-cpu=all --ckpt /sd-models/sd_xl_base_1.0.safetensors && \
-#    python3 cache-sd-model.py --no-half-vae --use-cpu=all --ckpt /sd-models/sd_xl_refiner_1.0.safetensors && \
-#    deactivate
+RUN source /venv/bin/activate && \
+    python3 cache-sd-model.py --no-half --use-cpu=all --ckpt /sd-models/sd_xl_base_1.0.safetensors && \
+    python3 cache-sd-model.py --no-half --use-cpu=all --ckpt /sd-models/sd_xl_refiner_1.0.safetensors && \
+    deactivate
 
 # Clone the Automatic1111 Extensions
 RUN git clone https://github.com/d8ahazard/sd_dreambooth_extension.git extensions/sd_dreambooth_extension && \
