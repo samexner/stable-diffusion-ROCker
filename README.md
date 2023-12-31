@@ -1,6 +1,6 @@
 # Docker image for A1111 Stable Diffusion Web UI, Kohya_ss and ComfyUI
 
-Now with SDXL and ROCm support. In progress. Not everything is working because of an incomplete xtensors, but it should work later with this PR. https://github.com/ROCmSoftwarePlatform/xformers/pull/6 
+Now with ROCm support. In progress. 
 
 ## Installs
 
