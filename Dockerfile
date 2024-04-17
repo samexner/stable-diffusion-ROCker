@@ -1,11 +1,11 @@
 # Stage 1: Base
-FROM rocm/dev-ubuntu-22.04:5.6.1-complete as base
+FROM rocm/dev-ubuntu-22.04:6.0.2-complete as base
 
-ARG WEBUI_VERSION=v1.7.0
-ARG DREAMBOOTH_COMMIT=cf086c536b141fc522ff11f6cffc8b7b12da04b9
-ARG KOHYA_VERSION=v22.4.0
+ARG WEBUI_VERSION=v1.9.0
+# ARG DREAMBOOTH_COMMIT=cf086c536b141fc522ff11f6cffc8b7b12da04b9
+# ARG KOHYA_VERSION=v22.4.0
 # ROCm: use 5.6 for now...
-ARG PYTORCH_URL=https://download.pytorch.org/whl/rocm5.6
+ARG PYTORCH_URL=https://download.pytorch.org/whl/rocm6.0
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND=noninteractive \
@@ -70,14 +70,10 @@ RUN ln -s /usr/bin/python3.10 /usr/bin/python
 # Install Torch
 # ROCm: Install tensorflow-rocm instead of tensorflow
 #
-RUN pip3 install --no-cache-dir torch torchvision torchaudio --index-url $PYTORCH_URL
-
-RUN pip3 install --no-cache-dir ninja tensorflow-rocm
+RUN pip3 install --no-cache-dir torch torchvision torchaudio --index-url $PYTORCH_URL && pip3 install --no-cache-dir ninja tensorflow-rocm
 
 # ROCm: Build xformers from source
-RUN pip3 install --no-cache-dir -v -U git+https://github.com/ROCmSoftwarePlatform/xformers.git@refs/pull/6/merge#egg=xformers
-
-RUN pip3 install --no-cache-dir tensorrt
+RUN pip3 install --no-cache-dir -v -U git+https://github.com/ROCm/xformers.git && pip3 install --no-cache-dir tensorrt
 
 # Stage 2: Install applications
 FROM base as setup
@@ -143,6 +139,7 @@ RUN source /venv/bin/activate && \
     cd /stable-diffusion-webui/extensions/sd-webui-reactor && \
     pip3 install -r requirements.txt && \
     pip3 install onnxruntime-gpu && \
+    pip3 install https://repo.radeon.com/rocm/manylinux/rocm-rel-6.0.2/onnxruntime_rocm-inference-1.17.0-cp310-cp310-linux_x86_64.whl && \
     cd /stable-diffusion-webui/extensions/infinite-image-browsing && \
     pip3 install -r requirements.txt && \
     cd /stable-diffusion-webui/extensions/adetailer && \
@@ -163,17 +160,17 @@ RUN source /venv/bin/activate && \
     deactivate
 
 # Set Dreambooth extension version
-WORKDIR /stable-diffusion-webui/extensions/sd_dreambooth_extension
-RUN git checkout main && \
-    git reset ${DREAMBOOTH_COMMIT} --hard
+# WORKDIR /stable-diffusion-webui/extensions/sd_dreambooth_extension
+# RUN git checkout main && \
+#     git reset ${DREAMBOOTH_COMMIT} --hard
 
 # Install the dependencies for the Dreambooth extension
-WORKDIR /stable-diffusion-webui
-COPY a1111/requirements_dreambooth.txt ./requirements.txt
-RUN source /venv/bin/activate && \
-    cd /stable-diffusion-webui/extensions/sd_dreambooth_extension && \
-    pip3 install -r requirements.txt && \
-    deactivate
+# WORKDIR /stable-diffusion-webui
+# COPY a1111/requirements_dreambooth.txt ./requirements.txt
+# RUN source /venv/bin/activate && \
+#    cd /stable-diffusion-webui/extensions/sd_dreambooth_extension && \
+#    pip3 install -r requirements.txt && \
+#    deactivate
 
 # Add inswapper model for the ReActor extension
 RUN mkdir -p /stable-diffusion-webui/models/insightface && \
@@ -191,24 +188,24 @@ RUN source /venv/bin/activate && \
     deactivate
 
 # Install Kohya_ss
-RUN git clone https://github.com/bmaltais/kohya_ss.git /kohya_ss
-WORKDIR /kohya_ss
-COPY kohya_ss/requirements* ./
-RUN git checkout ${KOHYA_VERSION} && \
-    python3 -m venv --system-site-packages venv && \
-    source venv/bin/activate && \
-    pip3 install --no-cache-dir torch torchvision torchaudio --index-url $PYTORCH_URL && \
-    pip3 install --no-cache-dir xformers \
-        bitsandbytes \
-        tensorboard \
-        tensorflow-rocm \
-        wheel \
-        scipy \
-        tensorrt && \
-    pip3 install -r requirements.txt && \
-    pip3 install . && \
-    pip3 cache purge && \
-    deactivate
+# RUN git clone https://github.com/bmaltais/kohya_ss.git /kohya_ss
+# WORKDIR /kohya_ss
+# COPY kohya_ss/requirements* ./
+# RUN git checkout ${KOHYA_VERSION} && \
+#    python3 -m venv --system-site-packages venv && \
+#    source venv/bin/activate && \
+#    pip3 install --no-cache-dir torch torchvision torchaudio --index-url $PYTORCH_URL && \
+#    pip3 install --no-cache-dir xformers \
+#        bitsandbytes \
+#        tensorboard \
+#        tensorflow-rocm \
+#        wheel \
+#        scipy \
+#        tensorrt && \
+#    pip3 install -r requirements.txt && \
+#    pip3 install . && \
+#    pip3 cache purge && \
+#    deactivate
 
 # Install ComfyUI
 RUN git clone https://github.com/comfyanonymous/ComfyUI.git /ComfyUI
