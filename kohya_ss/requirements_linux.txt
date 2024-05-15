@@ -1,4 +1,4 @@
-torch==2.1.2+rocm5.6 torchvision==0.16.0+rocm5.6 --index-url https://download.pytorch.org/whl/rocm5.6 # no_verify leave this to specify not checking this a verification stage
-xformers==0.0.23 bitsandbytes==0.41.1
-tensorflow-rocm==2.13.0.570
+torch torchvision # no_verify leave this to specify not checking this a verification stage
+xformers bitsandbytes
+tensorflow-rocm
 -r requirements.txt
