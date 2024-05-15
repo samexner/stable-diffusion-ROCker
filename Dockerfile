@@ -72,8 +72,9 @@ RUN ln -s /usr/bin/python3.10 /usr/bin/python
 # ROCm: Install tensorflow-rocm instead of tensorflow
 #
 RUN pip3 install --no-cache-dir torch torchvision torchaudio --index-url $PYTORCH_URL && \
-        pip3 install --no-cache-dir ninja tensorflow-rocm einops lion_pytorch accelerate && \
-        pip3 install git+https://github.com/ROCm/transformers.git
+        pip3 install --no-cache-dir ninja einops lion_pytorch accelerate && \
+        pip3 install --no-cache-dir https://repo.radeon.com/rocm/manylinux/rocm-rel-6.1/tensorflow_rocm-2.15.0-cp310-cp310-manylinux2014_x86_64.whl
+        pip3 install --no-cache-dir git+https://github.com/ROCm/transformers.git
 
 # ROCm: Build xformers and bitsandbytes from source
 RUN pip3 install --no-cache-dir -v -U git+https://github.com/ROCm/xformers.git && pip3 install --no-cache-dir tensorrt
@@ -81,7 +82,7 @@ RUN git clone --recurse https://github.com/ROCm/bitsandbytes && \
     cd bitsandbytes && \
     git checkout rocm6.2_internal_testing && \
     make hip && \
-    pip install . 
+    pip3 install . 
 
 # Stage 2: Install applications
 FROM base as setup
@@ -147,7 +148,9 @@ RUN source /venv/bin/activate && \
     cd /stable-diffusion-webui/extensions/sd-webui-reactor && \
     pip3 install -r requirements.txt && \
     pip3 install onnxruntime-gpu && \
-    pip3 install https://repo.radeon.com/rocm/manylinux/rocm-rel-6.0.2/onnxruntime_rocm-inference-1.17.0-cp310-cp310-linux_x86_64.whl && \
+    pip3 install https://repo.radeon.com/rocm/manylinux/rocm-rel-6.1/onnxruntime_rocm-inference-1.17.0-cp310-cp310-linux_x86_64.whl && \
+    pip3 install https://repo.radeon.com/rocm/manylinux/rocm-rel-6.1/onnxruntime_training-1.17.0+rocm610.82-cp310-cp310-linux_x86_64.whl && \
+    pip3 install https://repo.radeon.com/rocm/manylinux/rocm-rel-6.1/pytorch_triton_rocm-2.1.0+rocm6.1.4d510c3a44-cp310-cp310-linux_x86_64.whl && \
     cd /stable-diffusion-webui/extensions/infinite-image-browsing && \
     pip3 install -r requirements.txt && \
     cd /stable-diffusion-webui/extensions/adetailer && \
@@ -241,7 +244,7 @@ RUN git clone https://github.com/ashleykleynhans/app-manager.git /app-manager &&
 
 # Install Jupyter
 WORKDIR /
-RUN pip3 install -U --no-cache-dir jupyterlab \
+RUN pip3 install -U  jupyterlab \
         jupyterlab_widgets \
         ipykernel \
         ipywidgets \
