@@ -1,11 +1,11 @@
 # Stage 1: Base
-FROM rocm/dev-ubuntu-22.04:6.0.2-complete as base
+FROM rocm/dev-ubuntu-22.04:6.1.1-complete as base
 
-ARG WEBUI_VERSION=v1.9.0
-# ARG DREAMBOOTH_COMMIT=cf086c536b141fc522ff11f6cffc8b7b12da04b9
-# ARG KOHYA_VERSION=v22.4.0
-# ROCm: use 5.6 for now...
-ARG PYTORCH_URL=https://download.pytorch.org/whl/rocm6.0
+ARG WEBUI_VERSION=v1.9.3
+#ARG DREAMBOOTH_COMMIT=cf086c536b141fc522ff11f6cffc8b7b12da04b9
+ARG KOHYA_VERSION=v24.1.4
+# ROCm 6.1
+ARG PYTORCH_URL=https://download.pytorch.org/whl/rocm6.1
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND=noninteractive \
@@ -55,6 +55,7 @@ RUN apt update && \
         pkg-config \
         plocate \
         libcairo2-dev \
+        hipblaslt \
         libgoogle-perftools4 \
         libtcmalloc-minimal4 \
         apt-transport-https \
@@ -70,10 +71,17 @@ RUN ln -s /usr/bin/python3.10 /usr/bin/python
 # Install Torch
 # ROCm: Install tensorflow-rocm instead of tensorflow
 #
-RUN pip3 install --no-cache-dir torch torchvision torchaudio --index-url $PYTORCH_URL && pip3 install --no-cache-dir ninja tensorflow-rocm
+RUN pip3 install --no-cache-dir torch torchvision torchaudio --index-url $PYTORCH_URL && \
+        pip3 install --no-cache-dir ninja tensorflow-rocm einops lion_pytorch accelerate && \
+        pip3 install git+https://github.com/ROCm/transformers.git
 
-# ROCm: Build xformers from source
+# ROCm: Build xformers and bitsandbytes from source
 RUN pip3 install --no-cache-dir -v -U git+https://github.com/ROCm/xformers.git && pip3 install --no-cache-dir tensorrt
+RUN git clone --recurse https://github.com/ROCm/bitsandbytes && \
+    cd bitsandbytes && \
+    git checkout rocm6.2_internal_testing && \
+    make hip && \
+    pip install . 
 
 # Stage 2: Install applications
 FROM base as setup
@@ -187,25 +195,25 @@ RUN source /venv/bin/activate && \
     pip3 cache purge && \
     deactivate
 
-# Install Kohya_ss
-# RUN git clone https://github.com/bmaltais/kohya_ss.git /kohya_ss
-# WORKDIR /kohya_ss
-# COPY kohya_ss/requirements* ./
-# RUN git checkout ${KOHYA_VERSION} && \
-#    python3 -m venv --system-site-packages venv && \
-#    source venv/bin/activate && \
-#    pip3 install --no-cache-dir torch torchvision torchaudio --index-url $PYTORCH_URL && \
-#    pip3 install --no-cache-dir xformers \
-#        bitsandbytes \
-#        tensorboard \
-#        tensorflow-rocm \
-#        wheel \
-#        scipy \
-#        tensorrt && \
-#    pip3 install -r requirements.txt && \
-#    pip3 install . && \
-#    pip3 cache purge && \
-#    deactivate
+Install Kohya_ss
+RUN git clone https://github.com/bmaltais/kohya_ss.git /kohya_ss
+WORKDIR /kohya_ss
+COPY kohya_ss/requirements* ./
+RUN git checkout ${KOHYA_VERSION} && \
+    python3 -m venv --system-site-packages venv && \
+    source venv/bin/activate && \
+    pip3 install --no-cache-dir torch torchvision torchaudio --index-url $PYTORCH_URL && \
+    pip3 install --no-cache-dir xformers \
+        bitsandbytes \
+        tensorboard \
+        tensorflow-rocm \
+        wheel \
+        scipy \
+        tensorrt && \
+    pip3 install -r requirements.txt && \
+    pip3 install . && \
+    pip3 cache purge && \
+    deactivate
 
 # Install ComfyUI
 RUN git clone https://github.com/comfyanonymous/ComfyUI.git /ComfyUI
