@@ -1,4 +1,4 @@
-xformers==0.0.23
-bitsandbytes==0.41.1
-accelerate==0.23.0
-tensorflow-rocm==2.13.0.570
+xformers
+bitsandbytes
+accelerate
+tensorflow-rocm
