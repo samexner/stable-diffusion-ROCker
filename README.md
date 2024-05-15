@@ -1,11 +1,11 @@
 # Docker image for A1111 Stable Diffusion Web UI, Kohya_ss and ComfyUI
 
-Now with ROCm support. In progress. 
+ROCm fork. In progress. 
 
 ## Installs
 
 * Ubuntu 22.04 LTS
-* ROCm 5.6
+* ROCm 6.1
 * Python 3.10.12
 * [Automatic1111 Stable Diffusion Web UI](
   https://github.com/AUTOMATIC1111/stable-diffusion-webui) 1.7.0
@@ -27,7 +27,7 @@ Now with ROCm support. In progress.
 * [Kohya_ss](https://github.com/bmaltais/kohya_ss) v22.4.0
 * [ComfyUI](https://github.com/comfyanonymous/ComfyUI)
 * [ComfyUI Manager](https://github.com/ltdrdata/ComfyUI-Manager)
-* Torch 2.1.2
+* Torch 2.4.0
 * [xformers 0.0.23](https://github.com/ROCmSoftwarePlatform/xformers/)
 * [sd_xl_base_1.0.safetensors](
   https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors)
