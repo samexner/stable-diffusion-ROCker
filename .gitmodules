@@ -1,0 +1,30 @@
+[submodule "extensions/sd_dreambooth_extension"]
+	path = extensions/sd_dreambooth_extension
+	url = https://github.com/d8ahazard/sd_dreambooth_extension.git
+[submodule "extensions/sd-webui-controlnet"]
+	path = extensions/sd-webui-controlnet
+	url = https://github.com/Mikubill/sd-webui-controlnet.git
+[submodule "extensions/deforum"]
+	path = extensions/deforum
+	url = https://github.com/deforum-art/sd-webui-deforum.git
+[submodule "extensions/a1111-sd-webui-locon"]
+	path = extensions/a1111-sd-webui-locon
+	url = https://github.com/ashleykleynhans/a1111-sd-webui-locon.git
+[submodule "extensions/sd-webui-reactor"]
+	path = extensions/sd-webui-reactor
+	url = https://github.com/Gourieff/sd-webui-reactor.git
+[submodule "extensions/infinite-image-browsing"]
+	path = extensions/infinite-image-browsing
+	url = https://github.com/zanllp/sd-webui-infinite-image-browsing.git
+[submodule "extensions/inpaint-anything"]
+	path = extensions/inpaint-anything
+	url = https://github.com/Uminosachi/sd-webui-inpaint-anything.git
+[submodule "extensions/adetailer"]
+	path = extensions/adetailer
+	url = https://github.com/Bing-su/adetailer.git
+[submodule "extensions/sd_civitai_extension"]
+	path = extensions/sd_civitai_extension
+	url = https://github.com/civitai/sd_civitai_extension.git
+[submodule "extensions/sd-civitai-browser-plus"]
+	path = extensions/sd-civitai-browser-plus
+	url = https://github.com/BlafKing/sd-civitai-browser-plus.git
