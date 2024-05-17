@@ -5,7 +5,7 @@ ARG WEBUI_VERSION=v1.9.3
 #ARG DREAMBOOTH_COMMIT=cf086c536b141fc522ff11f6cffc8b7b12da04b9
 ARG KOHYA_VERSION=v24.1.4
 # ROCm 6.1
-ARG PYTORCH_URL=https://download.pytorch.org/whl/rocm6.1
+ARG PYTORCH_URL=https://repo.radeon.com/rocm/manylinux/rocm-rel-6.1/
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND=noninteractive \
@@ -71,8 +71,8 @@ RUN ln -s /usr/bin/python3.10 /usr/bin/python
 # Install Torch
 # ROCm: Install tensorflow-rocm instead of tensorflow
 #
-RUN pip3 install --no-cache-dir torch torchvision torchaudio --index-url $PYTORCH_URL && \
-        pip3 install --no-cache-dir ninja einops lion_pytorch accelerate && \
+RUN pip3 install --no-cache-dir torch torchvision --index-url $PYTORCH_URL && \
+        pip3 install --no-cache-dir ninja einops lion_pytorch accelerate lightning && \
         pip3 install --no-cache-dir https://repo.radeon.com/rocm/manylinux/rocm-rel-6.1/tensorflow_rocm-2.15.0-cp310-cp310-manylinux2014_x86_64.whl
         pip3 install --no-cache-dir git+https://github.com/ROCm/transformers.git
 
@@ -108,7 +108,7 @@ RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git && \
 WORKDIR /stable-diffusion-webui
 RUN python3 -m venv --system-site-packages /venv && \
     source /venv/bin/activate && \
-    pip3 install --no-cache-dir torch torchvision torchaudio --index-url $PYTORCH_URL && \
+    pip3 install --no-cache-dir torch torchvision --index-url $PYTORCH_URL && \
     pip3 install --no-cache-dir xformers && \
     deactivate
 
@@ -126,17 +126,20 @@ RUN source /venv/bin/activate && \
     python3 cache-sd-model.py --no-half --use-cpu=all --ckpt /sd-models/sd_xl_refiner_1.0.safetensors && \
     deactivate
 
+# Copy extension submodules to stable-diffusion-webui
+COPY extensions /stable-diffusion-webui ./
+
 # Clone the Automatic1111 Extensions
-RUN git clone https://github.com/d8ahazard/sd_dreambooth_extension.git extensions/sd_dreambooth_extension && \
-    git clone --depth=1 https://github.com/deforum-art/sd-webui-deforum.git extensions/deforum && \
-    git clone --depth=1 https://github.com/Mikubill/sd-webui-controlnet.git extensions/sd-webui-controlnet && \
-    git clone --depth=1 https://github.com/ashleykleynhans/a1111-sd-webui-locon.git extensions/a1111-sd-webui-locon && \
-    git clone --depth=1 https://github.com/Gourieff/sd-webui-reactor.git extensions/sd-webui-reactor && \
-    git clone --depth=1 https://github.com/zanllp/sd-webui-infinite-image-browsing.git extensions/infinite-image-browsing && \
-    git clone --depth=1 https://github.com/Uminosachi/sd-webui-inpaint-anything.git extensions/inpaint-anything && \
-    git clone --depth=1 https://github.com/Bing-su/adetailer.git extensions/adetailer && \
-    git clone --depth=1 https://github.com/civitai/sd_civitai_extension.git extensions/sd_civitai_extension && \
-    git clone --depth=1 https://github.com/BlafKing/sd-civitai-browser-plus.git extensions/sd-civitai-browser-plus
+#RUN git clone https://github.com/d8ahazard/sd_dreambooth_extension.git extensions/sd_dreambooth_extension && \
+#    git clone --depth=1 https://github.com/deforum-art/sd-webui-deforum.git extensions/deforum && \
+#    git clone --depth=1 https://github.com/Mikubill/sd-webui-controlnet.git extensions/sd-webui-controlnet && \
+#    git clone --depth=1 https://github.com/ashleykleynhans/a1111-sd-webui-locon.git extensions/a1111-sd-webui-locon && \
+#    git clone --depth=1 https://github.com/Gourieff/sd-webui-reactor.git extensions/sd-webui-reactor && \
+#    git clone --depth=1 https://github.com/zanllp/sd-webui-infinite-image-browsing.git extensions/infinite-image-browsing && \
+#    git clone --depth=1 https://github.com/Uminosachi/sd-webui-inpaint-anything.git extensions/inpaint-anything && \
+#    git clone --depth=1 https://github.com/Bing-su/adetailer.git extensions/adetailer && \
+#    git clone --depth=1 https://github.com/civitai/sd_civitai_extension.git extensions/sd_civitai_extension && \
+#    git clone --depth=1 https://github.com/BlafKing/sd-civitai-browser-plus.git extensions/sd-civitai-browser-plus
 
 # Install dependencies for Deforum, ControlNet, ReActor, Infinite Image Browsing,
 # After Detailer, and CivitAI Browser+ extensions
@@ -205,7 +208,7 @@ COPY kohya_ss/requirements* ./
 RUN git checkout ${KOHYA_VERSION} && \
     python3 -m venv --system-site-packages venv && \
     source venv/bin/activate && \
-    pip3 install --no-cache-dir torch torchvision torchaudio --index-url $PYTORCH_URL && \
+    pip3 install --no-cache-dir torch torchvision --index-url $PYTORCH_URL && \
     pip3 install --no-cache-dir xformers \
         bitsandbytes \
         tensorboard \
@@ -223,7 +226,7 @@ RUN git clone https://github.com/comfyanonymous/ComfyUI.git /ComfyUI
 WORKDIR /ComfyUI
 RUN python3 -m venv --system-site-packages venv && \
     source venv/bin/activate && \
-    pip3 install --no-cache-dir torch torchvision torchaudio --index-url $PYTORCH_URL && \
+    pip3 install --no-cache-dir torch torchvision --index-url $PYTORCH_URL && \
     pip3 install --no-cache-dir xformers && \
     pip3 install -r requirements.txt && \
     deactivate
