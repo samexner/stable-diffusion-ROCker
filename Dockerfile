@@ -201,7 +201,7 @@ RUN source /venv/bin/activate && \
     pip3 cache purge && \
     deactivate
 
-Install Kohya_ss
+# Install Kohya_ss
 RUN git clone https://github.com/bmaltais/kohya_ss.git /kohya_ss
 WORKDIR /kohya_ss
 COPY kohya_ss/requirements* ./
