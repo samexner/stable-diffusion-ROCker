@@ -127,7 +127,7 @@ RUN source /venv/bin/activate && \
     deactivate
 
 # Copy extension submodules to stable-diffusion-webui
-COPY extensions /stable-diffusion-webui ./
+COPY extensions /stable-diffusion-webui/
 
 # Clone the Automatic1111 Extensions
 #RUN git clone https://github.com/d8ahazard/sd_dreambooth_extension.git extensions/sd_dreambooth_extension && \
