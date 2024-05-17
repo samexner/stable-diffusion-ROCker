@@ -73,7 +73,7 @@ RUN ln -s /usr/bin/python3.10 /usr/bin/python
 #
 RUN pip3 install --no-cache-dir torch torchvision --index-url $PYTORCH_URL && \
         pip3 install --no-cache-dir ninja einops lion_pytorch accelerate lightning && \
-        pip3 install --no-cache-dir https://repo.radeon.com/rocm/manylinux/rocm-rel-6.1/tensorflow_rocm-2.15.0-cp310-cp310-manylinux2014_x86_64.whl
+        pip3 install --no-cache-dir https://repo.radeon.com/rocm/manylinux/rocm-rel-6.1/tensorflow_rocm-2.15.0-cp310-cp310-manylinux2014_x86_64.whl && \
         pip3 install --no-cache-dir git+https://github.com/ROCm/transformers.git
 
 # ROCm: Build xformers and bitsandbytes from source
