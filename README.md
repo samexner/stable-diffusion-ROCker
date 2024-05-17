@@ -53,10 +53,10 @@ any instances with less memory, eg. `t3a.medium`.
 
 ```bash
 # Clone the repo
-git clone https://github.com/ashleykleynhans/stable-diffusion-docker.git
+git clone --recursive https://github.com/samexner/stable-diffusion-ROCker.git
 
 # Download the models
-cd stable-diffusion-docker
+cd stable-diffusion-ROCker
 wget https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned.safetensors
 wget https://huggingface.co/stabilityai/sd-vae-ft-mse-original/resolve/main/vae-ft-mse-840000-ema-pruned.safetensors
 wget https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors
